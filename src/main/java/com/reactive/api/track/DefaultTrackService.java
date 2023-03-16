@@ -1,4 +1,4 @@
-package com.reactive.api.tracking;
+package com.reactive.api.track;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,6 @@ public class DefaultTrackService implements TrackService {
     private final TrackClient trackClient;
 
     public Mono<Map<String, Optional<Status>>> getTrack(List<String> trackOrderNumbers) {
-
         return Flux.fromIterable(trackOrderNumbers)
             .parallel()
             .runOn(Schedulers.parallel())

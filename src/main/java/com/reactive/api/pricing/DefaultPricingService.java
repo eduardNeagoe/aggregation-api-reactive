@@ -16,30 +16,16 @@ public class DefaultPricingService implements PricingService {
     private final PricingClient pricingClient;
 
     public Mono<Map<String, Optional<Double>>> getPricing(List<String> pricingCountryCodes) {
-
         return Flux.fromIterable(pricingCountryCodes)
             .parallel()
             .runOn(Schedulers.parallel())
-
-//            .log()
-
             .flatMap(pricingClient::getPricing)
             .sequential()
-
-//            .log()
-
-//            .elapsed()
-//            .doOnNext(objects -> System.out.println("@@@ Elapsed: " + objects))
-//            .map(objects -> objects.getT2())
-
             .collectMap(Pricing::getCountryCode, Pricing::getPrice)
             .doOnNext(this::removeEmptyValues);
-
-//            .log();
     }
 
     private boolean removeEmptyValues(Map<String, Optional<Double>> pricing) {
         return pricing.entrySet().removeIf(entry -> entry.getValue().isEmpty());
     }
-
 }

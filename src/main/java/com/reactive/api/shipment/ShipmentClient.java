@@ -16,20 +16,20 @@ import java.util.function.Predicate;
 @Component
 public class ShipmentClient {
 
-    private final WebClient pricingWebClient;
+    private final WebClient client;
 
     private final ConfigProperties configProperties;
 
 
     @Autowired
     public ShipmentClient(ConfigProperties configProperties) {
-        this.pricingWebClient = WebClient.create(configProperties.getShipmentBaseUrl());
+        this.client = WebClient.create(configProperties.getShipmentBaseUrl());
         this.configProperties = configProperties;
     }
 
     public Mono<Shipment> getShipment(String orderNumber) {
 
-        return pricingWebClient.get()
+        return client.get()
             .uri(configProperties.getShipmentUrl(), orderNumber)
             .retrieve()
             .bodyToMono(new ParameterizedTypeReference<List<Product>>() {

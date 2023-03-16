@@ -1,4 +1,4 @@
-package com.reactive.api.tracking;
+package com.reactive.api.track;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

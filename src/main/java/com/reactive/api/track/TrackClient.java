@@ -1,4 +1,4 @@
-package com.reactive.api.tracking;
+package com.reactive.api.track;
 
 import com.reactive.api.config.ConfigProperties;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,20 +14,20 @@ import java.util.function.Predicate;
 @Component
 public class TrackClient {
 
-    private final WebClient pricingWebClient;
+    private final WebClient client;
 
     private final ConfigProperties configProperties;
 
 
     @Autowired
     public TrackClient(ConfigProperties configProperties) {
-        this.pricingWebClient = WebClient.create(configProperties.getTrackBaseUrl());
+        this.client = WebClient.create(configProperties.getTrackBaseUrl());
         this.configProperties = configProperties;
     }
 
     public Mono<Track> getTrack(String orderNumber) {
 
-        return pricingWebClient.get()
+        return client.get()
             .uri(configProperties.getTrackUrl(), orderNumber)
             .retrieve()
             .bodyToMono(Status.class)

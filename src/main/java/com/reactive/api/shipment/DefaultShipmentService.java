@@ -16,7 +16,6 @@ public class DefaultShipmentService implements ShipmentService {
     private final ShipmentClient shipmentClient;
 
     public Mono<Map<String, Optional<List<Product>>>> getShipment(List<String> shipmentsOrderNumbers) {
-
         return Flux.fromIterable(shipmentsOrderNumbers)
             .parallel()
             .runOn(Schedulers.parallel())

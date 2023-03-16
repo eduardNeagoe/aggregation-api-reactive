@@ -1,0 +1,23 @@
+version: "3"
+
+networks:
+ aggregation-network:
+
+services:
+  aggregation-api:
+    image: aggregation-api-reactive
+    ports:
+      - "8080:8080"
+    networks:
+      - aggregation-network
+    environment:
+      aggregation.apis-base-url: http://backend-services:4000
+    depends_on:
+      - backend-services
+
+  backend-services:
+    image: qwkz/backend-services
+    ports:
+      - "4000:4000"
+    networks:
+      - aggregation-network

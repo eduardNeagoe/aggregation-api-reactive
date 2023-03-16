@@ -1,7 +1,7 @@
 package com.reactive.api.aggregation;
 
 import com.reactive.api.shipment.Product;
-import com.reactive.api.tracking.Status;
+import com.reactive.api.track.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -14,20 +14,20 @@ import java.util.function.Predicate;
 @Component
 public class PricingClient {
 
-    private final WebClient pricingWebClient;
+    private final WebClient client;
 
     private final ConfigProperties configProperties;
 
 
     @Autowired
     public PricingClient(ConfigProperties configProperties) {
-        this.pricingWebClient = WebClient.create(configProperties.getPricingBaseUrl());
+        this.client = WebClient.create(configProperties.getPricingBaseUrl());
         this.configProperties = configProperties;
     }
 
     public Mono<Pricing> getPricing(String pricingCountryCode) {
 
-        return pricingWebClient.get()
+        return client.get()
             .uri(configProperties.getPricingUrl(), pricingCountryCode)
             .retrieve()
             .bodyToMono(Double.class)
