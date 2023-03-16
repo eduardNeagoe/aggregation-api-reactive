@@ -1,0 +1,20 @@
+aggregation:
+  base-url: http://localhost:8080/
+  url: aggregation?shipmentsOrderNumbers={shipmentsOrderNumbers}&trackOrderNumbers={trackOrderNumbers}&pricingCountryCodes={pricingCountryCodes}
+  sla: 5000ms
+
+  shipment-base-url: ${aggregation.apis-base-url}
+  shipment-url: shipment-products?orderNumber={orderNumber}
+  shipment-timeout: ${aggregation.apis-timeout}
+
+  track-base-url: ${aggregation.apis-base-url}
+  track-url: track-status?orderNumber={orderNumber}
+  track-timeout: ${aggregation.apis-timeout}
+
+  pricing-base-url: ${aggregation.apis-base-url}
+  pricing-url: pricing?countryCode={pricingCountryCode}
+  pricing-timeout: ${aggregation.apis-timeout}
+
+
+  apis-base-url: http://localhost:4000/
+  apis-timeout: 3500ms
