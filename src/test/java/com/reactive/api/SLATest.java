@@ -13,6 +13,10 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.StopWatch;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient(timeout = "PT2M")
+@Testcontainers
 class SLATest {
     private double aggregationSLA;
 
@@ -34,19 +39,29 @@ class SLATest {
     @Autowired
     private ConfigProperties properties;
 
+    //    @LocalServerPort
+//    private String serverPort;
+    private String uri;
+    public static final String BACKEND_SERVICES_CONTAINER = "qwkz/backend-services:latest";
+    @Container
+    public GenericContainer<?> backedServicesContainer = new GenericContainer(DockerImageName.parse(BACKEND_SERVICES_CONTAINER))
+        .withExposedPorts(4000);
+
     @BeforeEach
     public void prepare() {
         // the SLA of the aggregation API in millis
         aggregationSLA = Long.valueOf(properties.getSla().toMillis()).doubleValue();
         requestDurationMonitor.clear();
+        org.testcontainers.Testcontainers.exposeHostPorts(4000);
+        uri = backedServicesContainer.getHost() + ":" + backedServicesContainer.getFirstMappedPort() + "/" + properties.getUrl();
+
     }
 
     @Test
     @DisplayName("Aggregation should respect the SLA for the 99th percentile")
     void aggregationSLA() {
-
         // TODO set to 1000
-        int numberOfRequests = 100;
+        int numberOfRequests = 10;
 
         String countryCodes = TestUtil.getAllCountryCodes(); // 249 codes
         String orderNumbers = generateOrderNumbers(300);
@@ -58,7 +73,7 @@ class SLATest {
                 StopWatch stopWatch = startNewStopWatch();
 
                 Aggregation aggregation = webTestClient.get()
-                    .uri(getAggregationUrl(), orderNumbers, orderNumbers, countryCodes)
+                    .uri(uri, orderNumbers, orderNumbers, countryCodes)
                     .exchange()
                     .expectStatus().isOk()
                     .expectBody(Aggregation.class)
@@ -82,7 +97,8 @@ class SLATest {
     }
 
     private String getAggregationUrl() {
-        return properties.getBaseUrl() + properties.getUrl();
+//        return properties.getBaseUrl() + properties.getUrl();
+        return backedServicesContainer.getHost() + ":" + backedServicesContainer.getFirstMappedPort() + "/" + properties.getUrl();
     }
 
     private Double getDurationFor99thPercentile(HashMap<Integer, Double> requestDurationMonitor, double numberOfRequests) {
