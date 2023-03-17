@@ -30,7 +30,6 @@ public class ConfigProperties {
     private String pricingUrl;
     private Duration pricingTimeout;
 
-
     private Duration apisTimeout;
 
 }

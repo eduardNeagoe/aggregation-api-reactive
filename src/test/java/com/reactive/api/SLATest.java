@@ -14,8 +14,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.StopWatch;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -26,7 +27,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class SLATest {
     private double aggregationSLA;
 
-    private HashMap<Integer, Double> requestDurationMonitor = new HashMap<>();
+    private Map<Integer, Double> requestDurationMonitor = new ConcurrentHashMap<>();
+
+    private String aggregationUrl;
 
     @Autowired
     private WebTestClient webTestClient;
@@ -39,17 +42,17 @@ class SLATest {
         // the SLA of the aggregation API in millis
         aggregationSLA = Long.valueOf(properties.getSla().toMillis()).doubleValue();
         requestDurationMonitor.clear();
+        aggregationUrl = properties.getBaseUrl() + properties.getUrl();
     }
 
     @Test
     @DisplayName("Aggregation should respect the SLA for the 99th percentile")
     void aggregationSLA() {
 
-        // TODO set to 1000
-        int numberOfRequests = 100;
+        int numberOfRequests = 1000;
 
         String countryCodes = TestUtil.getAllCountryCodes(); // 249 codes
-        String orderNumbers = generateOrderNumbers(300);
+        String orderNumbers = TestUtil.generateOrderNumbers(300);
 
         IntStream.rangeClosed(1, numberOfRequests)
             .parallel()
@@ -58,7 +61,7 @@ class SLATest {
                 StopWatch stopWatch = startNewStopWatch();
 
                 Aggregation aggregation = webTestClient.get()
-                    .uri(getAggregationUrl(), orderNumbers, orderNumbers, countryCodes)
+                    .uri(aggregationUrl, orderNumbers, orderNumbers, countryCodes)
                     .exchange()
                     .expectStatus().isOk()
                     .expectBody(Aggregation.class)
@@ -81,11 +84,7 @@ class SLATest {
             "99th percentile duration was: %s".formatted(durationFor99thPercentile));
     }
 
-    private String getAggregationUrl() {
-        return properties.getBaseUrl() + properties.getUrl();
-    }
-
-    private Double getDurationFor99thPercentile(HashMap<Integer, Double> requestDurationMonitor, double numberOfRequests) {
+    private Double getDurationFor99thPercentile(Map<Integer, Double> requestDurationMonitor, double numberOfRequests) {
         List<Double> sortedDurations = requestDurationMonitor.values().stream().sorted().toList();
         //TODO remove
         System.out.println("⏱️ Durations sorted ASC: " + sortedDurations);
@@ -110,14 +109,6 @@ class SLATest {
     private double getDurationInMilliSeconds(StopWatch requestStopWatch) {
         requestStopWatch.stop();
         return requestStopWatch.getTotalTimeMillis();
-    }
-
-    private String generateOrderNumbers(int numberOfOrders) {
-        List<String> numbers = IntStream.rangeClosed(1, numberOfOrders)
-            .boxed()
-            .map(String::valueOf)
-            .toList();
-        return String.join(",", numbers);
     }
 
     private String prettyPrint(Aggregation aggregation) {

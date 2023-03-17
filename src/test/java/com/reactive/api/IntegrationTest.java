@@ -27,16 +27,8 @@ class IntegrationTest {
     private ConfigProperties properties;
 
     @Test
-    void whenNoRequestParams_expectAggregationIsEmpty() {
-        Aggregation aggregation = webTestClient.get()
-            .uri(getAggregationUrl(), null, null, null)
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody(Aggregation.class)
-            .returnResult()
-            .getResponseBody();
-
-        printAggregationResult(aggregation);
+    void whenRequestHasNoParams_expectNoData() {
+        Aggregation aggregation = requestAggregation(null, null, null);
 
         assertAll(
             () -> assertNotNull(aggregation),
@@ -47,17 +39,11 @@ class IntegrationTest {
     }
 
     @Test
-    //TODO fails in suite
-    void whenCallingAllAPIs_expectThemAllToRespond() {
-        Aggregation aggregation = webTestClient.get()
-            .uri(getAggregationUrl(), 1, 2, "AD")
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody(Aggregation.class)
-            .returnResult()
-            .getResponseBody();
+    void whenRequestHasAllParams_expectFullDataAggregation() {
+        String orderNumbers = TestUtil.generateOrderNumbers(3);
+        String countryCodes = TestUtil.getCountryCodes(3);
 
-        printAggregationResult(aggregation);
+        Aggregation aggregation = requestAggregation(orderNumbers, orderNumbers, countryCodes);
 
         assertAll(
             () -> assertNotNull(aggregation),
@@ -68,28 +54,60 @@ class IntegrationTest {
     }
 
     @Test
-    void whenStressTestingPricingAPI_expectProcessingTimeIsWithinSLA() {
+    void whenRequestHasOnlyShipmentsParams_expectOnlyShipmentsData() {
+        String shipmentsOrderNumbers = TestUtil.generateOrderNumbers(10);
 
+        Aggregation aggregation = requestAggregation(shipmentsOrderNumbers, null, null);
+
+        assertAll(
+            () -> assertNotNull(aggregation),
+            () -> assertTrue(aggregation.getPricing().isEmpty()),
+            () -> assertFalse(aggregation.getShipments().isEmpty()),
+            () -> assertTrue(aggregation.getTrack().isEmpty())
+        );
+    }
+
+    @Test
+    void whenRequestHasOnlyTrackParams_expectOnlyTrackData() {
+        String trackOrderNumbers = TestUtil.generateOrderNumbers(10);
+
+        Aggregation aggregation = requestAggregation(null, trackOrderNumbers, null);
+
+        assertAll(
+            () -> assertNotNull(aggregation),
+            () -> assertTrue(aggregation.getPricing().isEmpty()),
+            () -> assertTrue(aggregation.getShipments().isEmpty()),
+            () -> assertFalse(aggregation.getTrack().isEmpty())
+        );
+    }
+
+    @Test
+    void whenRequestHasOnlyPricingParams_expectOnlyPricingData() {
         String countryCodes = TestUtil.getCountryCodes(10);
 
-        Object orderNumbers = null; // no call to the shipments and track APIs
+        Aggregation aggregation = requestAggregation(null, null, countryCodes);
 
+        assertAll(
+            () -> assertNotNull(aggregation),
+            () -> assertFalse(aggregation.getPricing().isEmpty()),
+            () -> assertTrue(aggregation.getShipments().isEmpty()),
+            () -> assertTrue(aggregation.getTrack().isEmpty())
+        );
+    }
+
+    private Aggregation requestAggregation(String shipmentsOrderNumbers, String trackOrderNumbers, String pricingCountryCodes) {
         Aggregation aggregation = webTestClient.get()
-            .uri(getAggregationUrl(), orderNumbers, orderNumbers, countryCodes)
+            .uri(getAggregationUrl(), shipmentsOrderNumbers, trackOrderNumbers, pricingCountryCodes)
             .exchange()
             .expectStatus().isOk()
             .expectBody(Aggregation.class)
             .returnResult()
             .getResponseBody();
 
+        //TODO remove
         printAggregationResult(aggregation);
 
-        assertAll(
-            () -> assertNotNull(aggregation),
-            () -> assertFalse(aggregation.getShipments().isEmpty()),
-            () -> assertFalse(aggregation.getTrack().isEmpty()),
-            () -> assertFalse(aggregation.getPricing().isEmpty())
-        );
+        return aggregation;
     }
 
     private void printAggregationResult(Aggregation aggregation) {
@@ -100,6 +118,7 @@ class IntegrationTest {
         return properties.getBaseUrl() + properties.getUrl();
     }
 
+    //TODO remove
     private String prettyPrint(Aggregation aggregation) {
         try {
             return JacksonConfiguration.MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(aggregation);

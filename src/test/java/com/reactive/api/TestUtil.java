@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.IntStream;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TestUtil {
@@ -19,5 +20,13 @@ public class TestUtil {
 
     public static String getAllCountryCodes() {
         return String.join(",", ALL_COUNTRY_CODES);
+    }
+
+    public static String generateOrderNumbers(int numberOfOrders) {
+        List<String> numbers = IntStream.rangeClosed(1, numberOfOrders)
+            .boxed()
+            .map(String::valueOf)
+            .toList();
+        return String.join(",", numbers);
     }
 }
