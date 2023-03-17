@@ -55,6 +55,7 @@ class SLATest {
         String orderNumbers = TestUtil.generateOrderNumbers(300);
 
         IntStream.rangeClosed(1, numberOfRequests)
+            // number of threads = number of CPU cores - 1
             .parallel()
             .forEach(requestNumber -> {
 

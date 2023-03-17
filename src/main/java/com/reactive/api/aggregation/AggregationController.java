@@ -19,7 +19,6 @@ public class AggregationController {
     public Mono<Aggregation> aggregate(@RequestParam Optional<List<String>> shipmentsOrderNumbers,
                                        @RequestParam Optional<List<String>> trackOrderNumbers,
                                        @RequestParam Optional<List<String>> pricingCountryCodes) {
-
         return aggregationService.aggregate(shipmentsOrderNumbers, trackOrderNumbers, pricingCountryCodes);
     }
 }

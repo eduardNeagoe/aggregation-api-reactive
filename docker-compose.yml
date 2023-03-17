@@ -5,7 +5,7 @@ networks:
 
 services:
   aggregation-api:
-    image: aggregation-api-reactive
+    image: aggregation-api
     ports:
       - "8080:8080"
     networks:
