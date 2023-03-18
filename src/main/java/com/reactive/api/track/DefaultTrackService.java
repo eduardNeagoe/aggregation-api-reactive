@@ -21,7 +21,7 @@ public class DefaultTrackService implements TrackService {
             .runOn(Schedulers.parallel())
             .flatMap(trackClient::getTrack)
             .sequential()
-            .collectMap(Track::getOrderNumber, track -> track.getStatus())
+            .collectMap(Track::getOrderNumber, Track::getStatus)
             .doOnNext(this::removeEmptyValues);
     }
 

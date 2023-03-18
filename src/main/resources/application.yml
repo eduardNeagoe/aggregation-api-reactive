@@ -22,4 +22,4 @@ aggregation:
   apis-base-url: http://localhost:${aggregation.apis-port}
   apis-port: 4000
   # timeout for (Shipments, Track and Pricing APIS) that doesn't lead to breaking the SLA - obtained empirically
-  apis-timeout: 3000ms
+  apis-timeout: 2500ms

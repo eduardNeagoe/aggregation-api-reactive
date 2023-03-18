@@ -92,6 +92,4 @@ log/
 target/
 
 # JMeter
-/load-test-run.log
-/load-test-results.csv
-/load-test-web-report*
+/jmeter-load-test/load-test-results*
