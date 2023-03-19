@@ -6,6 +6,7 @@ import com.reactive.api.shipment.ShipmentService;
 import com.reactive.api.track.Status;
 import com.reactive.api.track.TrackService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -16,6 +17,7 @@ import java.util.OptionalDouble;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DefaultAggregationService implements AggregationService {
 
     private final ShipmentService shipmentService;
@@ -26,6 +28,8 @@ public class DefaultAggregationService implements AggregationService {
     public Mono<Aggregation> aggregate(Optional<List<String>> shipmentsOrderNumbers,
                                        Optional<List<String>> trackOrderNumbers,
                                        Optional<List<String>> pricingCountryCodes) {
+
+        log.info("Processing Aggregation request...");
 
         Mono<Map<String, Optional<List<Product>>>> shipments = shipmentsOrderNumbers
             .map(shipmentService::getShipment)
@@ -40,7 +44,8 @@ public class DefaultAggregationService implements AggregationService {
             .orElse(Mono.just(Map.of()));
 
         return Mono.zip(shipments, track, pricing)
-            .map(tuple -> aggregate(tuple.getT1(), tuple.getT2(), tuple.getT3()));
+            .map(tuple -> aggregate(tuple.getT1(), tuple.getT2(), tuple.getT3()))
+            .doOnNext(aggregation -> log.info("Aggregation finished"));
     }
 
     private Aggregation aggregate(Map<String, Optional<List<Product>>> shipments,
