@@ -1,4 +1,32 @@
-# Application
+# Contents
+
+- [Application description](#application-description)
+    * [APIs Contracts](#apis-contracts)
+- [Design decisions](#design-decisions)
+    * [Technology choices](#technology-choices)
+        + [Why reactive?](#why-reactive-)
+    * [API orchestration decisions](#api-orchestration-decisions)
+        + [Orchestrating the calls to each API - Shipments, Track, Pricing](#orchestrating-the-calls-to-each-api---shipments--track--pricing)
+            - [Problem](#problem)
+            - [Solution](#solution)
+        + [Orchestrating the Aggregation services calls](#orchestrating-the-aggregation-services-calls)
+            - [Problem](#problem-1)
+            - [Solution](#solution-1)
+    * [Future considerations](#future-considerations)
+        + [Tech stack](#tech-stack)
+- [Starting the application](#starting-the-application)
+- [Testing](#testing)
+    * [The JMeter load test](#the-jmeter-load-test)
+        + [Running the JMeter load test](#running-the-jmeter-load-test)
+        + [JMeter load test results - the 99th percentile](#jmeter-load-test-results---the-99th-percentile)
+            - [Optimizations](#optimizations)
+            - [Limitations](#limitations)
+    * [Integration tests](#integration-tests)
+        + [Load test](#load-test)
+        + [Other tests](#other-tests)
+
+
+# Application description
 
 This application a [microservice API composer](https://microservices.io/patterns/data/api-composition.html).
 
@@ -74,7 +102,7 @@ Content-Type: application/json
 
 # Design decisions
 
-## Technology choices:
+## Technology choices
 
 - **Spring Boot:** Simplifies web application development. Provides a quick setup and a robust ecosystem.
 
@@ -202,9 +230,20 @@ publishers. When all the 3 responses are available we create the Aggregation res
 This pattern minimizes§ the latency when aggregating the maps that result from the implementation we discussed in the
 previous section.
 
-## Starting the application
+## Future considerations
 
-- Run the sh script `runApps.sh`.
+### Tech stack
+
+This app could benefit from caching to reduce the number of calls it makes to the Backend Services API.
+
+Redis could be a valid choice because it is an in-memory data store that can be used to store and retrieve frequently
+accessed data quickly. These are libraries for Redis that provide support for reactive programming and non-blocking interactions with Redis.
+
+A drawback of introducing this mechanism is that the cached data may become stale.
+
+# Starting the application
+
+- Run the sh script [runApps.sh](runApps.sh).
 
 This script:
 
@@ -213,6 +252,8 @@ This script:
 - starts both Aggregation API and the Backed Services API using docker compose
 
 To stop the app hit `Ctrl + C` in the same terminal window.
+
+# Testing
 
 ## The JMeter load test
 
@@ -225,9 +266,9 @@ resulting in 1000 requests total.
 
 ### Running the JMeter load test
 
-Precondition: The apps have already been started with `runApps.sh`.
+Precondition: The apps have already been started with [runApps.sh](runApps.sh).
 
-- Run the sh script `runLoadTest.sh`.
+- Run the sh script [runLoadTest.sh](runLoadTest.sh).
 
 This script runs the jmeter command that tests the app.
 
@@ -267,9 +308,11 @@ production environment as much as possible because performance depends on proces
 handle the load. This approach eliminates the impact of the local machine limitations, protecting the accuracy of the
 results.
 
-### Integration load test - SLATest.java
+## Integration tests
 
-There is also the `SLATest` integration test that runs 1000 requests in parallel using the ForkJoin common pool of
+### Load test
+
+There is also the [SLATest.java](src%2Ftest%2Fjava%2Fcom%2Freactive%2Fapi%2FSLATest.java) integration test that runs 1000 requests in parallel using the ForkJoin common pool of
 threads. It saves the durations in a sorted collection and compares the 99th percentile to the SLA of 5 seconds.
 
 I actually created it before creating the JMeter test, but I recommend relying on the JMeter test results because that
@@ -283,13 +326,8 @@ Please consider this test a bonus, but not the final indicator of the SLA.
 
 ⚠️ This test slows down the build time a lot.
 
-## Future considerations
+### Other tests
 
-### Tech stack
+All the tests I provided in this app are integration tests - they require you to start the Backend Service API before running them.
 
-This app could benefit from caching to reduce the number of calls it makes to the Backend Services API.
-
-Redis could be a valid choice because it is an in-memory data store that can be used to store and retrieve frequently
-accessed data quickly. These are libraries for Redis that provide support for reactive programming and non-blocking interactions with Redis.
-
-A drawback of introducing this mechanism is that the cached data may become stale.
+To do that, you can use the [runBackendServicesOnly.sh](runBackendServicesOnly.sh) script.
