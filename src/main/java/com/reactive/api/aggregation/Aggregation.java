@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
 
 
 @Data
@@ -21,5 +22,5 @@ public class Aggregation {
 
     private Map<String, Optional<List<Product>>> shipments = new HashMap<>();
     private Map<String, Optional<Status>> track = new HashMap<>();
-    private Map<String, Optional<Double>> pricing = new HashMap<>();
+    private Map<String, OptionalDouble> pricing = new HashMap<>();
 }

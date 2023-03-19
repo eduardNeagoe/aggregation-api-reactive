@@ -32,4 +32,27 @@ public class ConfigProperties {
 
     private Duration apisTimeout;
 
+    private Cache cache;
+
+    public String getCacheHost() {
+        return cache.getHost();
+    }
+
+    public String getCachePort() {
+        return cache.getPort();
+    }
+
+    public Duration getExpiration() {
+        return cache.getExpiration();
+    }
+
+    @Getter
+    @Setter
+    static class Cache {
+        private boolean enabled;
+        private String host;
+        private String port;
+        private Duration expiration;
+    }
+
 }

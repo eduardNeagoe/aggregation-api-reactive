@@ -8,14 +8,14 @@ import reactor.core.scheduler.Schedulers;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.OptionalDouble;
 
 @Service
 @RequiredArgsConstructor
 public class DefaultPricingService implements PricingService {
     private final PricingClient pricingClient;
 
-    public Mono<Map<String, Optional<Double>>> getPricing(List<String> pricingCountryCodes) {
+    public Mono<Map<String, OptionalDouble>> getPricing(List<String> pricingCountryCodes) {
         return Flux.fromIterable(pricingCountryCodes)
             .parallel()
             .runOn(Schedulers.parallel())
@@ -25,7 +25,7 @@ public class DefaultPricingService implements PricingService {
             .doOnNext(this::removeEmptyValues);
     }
 
-    private boolean removeEmptyValues(Map<String, Optional<Double>> pricing) {
+    private boolean removeEmptyValues(Map<String, OptionalDouble> pricing) {
         return pricing.entrySet().removeIf(entry -> entry.getValue().isEmpty());
     }
 }

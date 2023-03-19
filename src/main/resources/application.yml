@@ -5,6 +5,11 @@ aggregation:
   base-url: http://localhost:${server.port}/
   url: aggregation?shipmentsOrderNumbers={shipmentsOrderNumbers}&trackOrderNumbers={trackOrderNumbers}&pricingCountryCodes={pricingCountryCodes}
   sla: 5000ms
+  cache:
+    enabled: true
+    port: 3000
+    host: localhost
+    expiration: 30m
 
   shipment-base-url: ${aggregation.apis-base-url}
   shipment-url: shipment-products?orderNumber={orderNumber}
@@ -21,5 +26,4 @@ aggregation:
 
   apis-base-url: http://localhost:${aggregation.apis-port}
   apis-port: 4000
-  # timeout for (Shipments, Track and Pricing APIS) that doesn't lead to breaking the SLA - obtained empirically
   apis-timeout: 2500ms

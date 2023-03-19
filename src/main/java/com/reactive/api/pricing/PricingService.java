@@ -4,9 +4,9 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.OptionalDouble;
 
 public interface PricingService {
 
-    Mono<Map<String, Optional<Double>>> getPricing(List<String> pricingCountryCodes);
+    Mono<Map<String, OptionalDouble>> getPricing(List<String> pricingCountryCodes);
 }
