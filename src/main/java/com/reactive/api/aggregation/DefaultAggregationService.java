@@ -16,7 +16,6 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class DefaultAggregationService implements AggregationService {
 
     private final ShipmentService shipmentService;
@@ -27,10 +26,6 @@ public class DefaultAggregationService implements AggregationService {
     public Mono<Aggregation> aggregate(Optional<List<String>> shipmentsOrderNumbers,
                                        Optional<List<String>> trackOrderNumbers,
                                        Optional<List<String>> pricingCountryCodes) {
-
-        //TODO remove
-        log.info("Received request for: %n%s%n %n%s%n %n%s%n "
-            .formatted(shipmentsOrderNumbers, trackOrderNumbers, pricingCountryCodes));
 
         Mono<Map<String, Optional<List<Product>>>> shipments = shipmentsOrderNumbers
             .map(shipmentService::getShipment)

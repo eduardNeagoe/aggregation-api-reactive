@@ -1,10 +1,8 @@
 package com.reactive.api;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.reactive.api.aggregation.Aggregation;
 import com.reactive.api.config.ConfigProperties;
-import com.reactive.api.config.JacksonConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -72,9 +70,6 @@ class SLATest {
                 double requestDuration = getDurationInMilliSeconds(stopWatch);
                 requestDurationMonitor.put(requestNumber, requestDuration);
 
-                //TODO remove
-                printRequestAggregationResult(requestNumber, aggregation);
-
                 assertNotNull(aggregation);
             });
 
@@ -87,18 +82,11 @@ class SLATest {
 
     private Double getDurationFor99thPercentile(Map<Integer, Double> requestDurationMonitor, double numberOfRequests) {
         List<Double> sortedDurations = requestDurationMonitor.values().stream().sorted().toList();
-        //TODO remove
-        System.out.println("⏱️ Durations sorted ASC: " + sortedDurations);
 
         int ninetyNinePercentOfNumberOfReq = (int) Math.round(numberOfRequests * 0.99);
         int indexOf99thPercentile = ninetyNinePercentOfNumberOfReq - 1;
 
         return sortedDurations.get(indexOf99thPercentile);
-    }
-
-    //TODO remove
-    private void printRequestAggregationResult(int requestNumber, Aggregation aggregation) {
-        System.out.printf("👉 Request #%d Aggregation result:%n " + prettyPrint(aggregation) + "%n", requestNumber);
     }
 
     private StopWatch startNewStopWatch() {
@@ -110,13 +98,5 @@ class SLATest {
     private double getDurationInMilliSeconds(StopWatch requestStopWatch) {
         requestStopWatch.stop();
         return requestStopWatch.getTotalTimeMillis();
-    }
-
-    private String prettyPrint(Aggregation aggregation) {
-        try {
-            return JacksonConfiguration.MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(aggregation);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

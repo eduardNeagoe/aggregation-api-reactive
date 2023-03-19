@@ -1,10 +1,8 @@
 package com.reactive.api;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.reactive.api.aggregation.Aggregation;
 import com.reactive.api.config.ConfigProperties;
-import com.reactive.api.config.JacksonConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -104,27 +102,11 @@ class IntegrationTest {
             .returnResult()
             .getResponseBody();
 
-        //TODO remove
-        printAggregationResult(aggregation);
-
         return aggregation;
-    }
-
-    private void printAggregationResult(Aggregation aggregation) {
-        System.out.printf("👉 Aggregation result:%n " + prettyPrint(aggregation));
     }
 
     private String getAggregationUrl() {
         return properties.getBaseUrl() + properties.getUrl();
-    }
-
-    //TODO remove
-    private String prettyPrint(Aggregation aggregation) {
-        try {
-            return JacksonConfiguration.MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(aggregation);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
     }
 
 }
