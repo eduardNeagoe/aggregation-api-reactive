@@ -3,6 +3,7 @@ package com.reactive.api;
 
 import com.reactive.api.aggregation.Aggregation;
 import com.reactive.api.config.ConfigProperties;
+import com.reactive.api.util.TestUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

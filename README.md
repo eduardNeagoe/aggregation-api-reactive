@@ -4,7 +4,8 @@
     * [APIs Contracts](#apis-contracts)
 - [Design decisions](#design-decisions)
     * [Technology choices](#technology-choices)
-        + [Why reactive?](#why-reactive-)
+        + [Why reactive?](#why-reactive)
+        + [Why caching?](#why-caching)
     * [API orchestration decisions](#api-orchestration-decisions)
         + [Orchestrating the calls to each API - Shipments, Track, Pricing](#orchestrating-the-calls-to-each-api---shipments--track--pricing)
             - [Problem](#problem)
@@ -12,8 +13,6 @@
         + [Orchestrating the Aggregation services calls](#orchestrating-the-aggregation-services-calls)
             - [Problem](#problem-1)
             - [Solution](#solution-1)
-    * [Future considerations](#future-considerations)
-        + [Tech stack](#tech-stack)
 - [Starting the application](#starting-the-application)
 - [Testing](#testing)
     * [The JMeter load test](#the-jmeter-load-test)
@@ -24,9 +23,9 @@
     * [Integration tests](#integration-tests)
         + [Load test](#load-test)
         + [Other tests](#other-tests)
-
-
+      
 # Application description
+
 
 This application a [microservice API composer](https://microservices.io/patterns/data/api-composition.html).
 
@@ -113,6 +112,9 @@ Content-Type: application/json
 - **Project Reactor:** Provides a set of operators and APIs for building reactive streams and processing data
   asynchronously. Provides Spring WebFlux with reactive capabilities.
 
+- **Redis:**  To serve as a cache. Redis is an in-memory data store that can be used to store and retrieve frequently
+  accessed data quickly.
+
 - **Docker:** Provides a lightweight and isolated runtime environment. Makes the app and its dependent microservice
   portable and independent of the host environment.
 
@@ -131,6 +133,23 @@ Efficiently running a mix of sequential and parallel service invocations can be 
 
 That's where the reactive design comes into play. API composers should use a reactive design to best achieve
 maintainability, performance, and scalability.
+
+### Why caching?
+
+This app could benefit from caching to reduce the number of calls it makes to the Backend Services API.
+
+Redis is a valid choice because it is an in-memory data store that can be used to store and retrieve frequently
+accessed data quickly. These are libraries like Lettuce that provide support for reactive programming and non-blocking
+interactions with Redis. A drawback of introducing this mechanism is that the cached data may become stale.
+
+⚠️ By default, the caching is enabled. You can control the caching feature through the following properties:
+
+```
+aggregation.cache.enabled: true
+aggregation.cache.port: 3000
+aggregation.cache.host: localhost
+aggregation.cache.expiration: 30m
+```
 
 ## API orchestration decisions
 
@@ -230,17 +249,6 @@ publishers. When all the 3 responses are available we create the Aggregation res
 This pattern minimizes§ the latency when aggregating the maps that result from the implementation we discussed in the
 previous section.
 
-## Future considerations
-
-### Tech stack
-
-This app could benefit from caching to reduce the number of calls it makes to the Backend Services API.
-
-Redis could be a valid choice because it is an in-memory data store that can be used to store and retrieve frequently
-accessed data quickly. These are libraries for Redis that provide support for reactive programming and non-blocking interactions with Redis.
-
-A drawback of introducing this mechanism is that the cached data may become stale.
-
 # Starting the application
 
 - Run the sh script [runApps.sh](runApps.sh).
@@ -287,9 +295,16 @@ report and check the value for the 99th percentile, as shown in the next section
 The goal was to get a duration lower than 5000 ms for the 99th percentile.
 Such an SLA means 99% of the requests would take less than 5 seconds to respond.
 
-This is a screenshot of the results I got when running the test locally:
+This is a screenshot of the results I got when running the test locally, with no caching:
 
-![99thPercentile.png](jmeter-load-test/99thPercentile.png)
+![99th-percentile.png](jmeter-load-test%2F99th-percentile.png)
+
+
+This is a screenshot of the results I got when running the test locally, **with caching**:
+
+![99th-percentile-redis-cache.png](jmeter-load-test%2F99th-percentile-redis-cache.png)
+
+The results are incredible. The value went from ~4000 ms to 1000 ms.
 
 #### Optimizations
 
@@ -312,7 +327,8 @@ results.
 
 ### Load test
 
-There is also the [SLATest.java](src%2Ftest%2Fjava%2Fcom%2Freactive%2Fapi%2FSLATest.java) integration test that runs 1000 requests in parallel using the ForkJoin common pool of
+There is also the [SLATest.java](src%2Ftest%2Fjava%2Fcom%2Freactive%2Fapi%2FSLATest.java) integration test that runs
+1000 requests in parallel using the ForkJoin common pool of
 threads. It saves the durations in a sorted collection and compares the 99th percentile to the SLA of 5 seconds.
 
 I actually created it before creating the JMeter test, but I recommend relying on the JMeter test results because that
@@ -324,10 +340,11 @@ the performance.
 
 Please consider this test a bonus, but not the final indicator of the SLA.
 
-⚠️ This test slows down the build time a lot.
+⚠️ This test slows down the build time a lot if caching is disabled.
 
 ### Other tests
 
-All the tests I provided in this app are integration tests - they require you to start the Backend Service API before running them.
+All the tests I provided in this app are integration tests - they require you to start the Backend Service API and Redis before
+running them.
 
-To do that, you can use the [runBackendServicesOnly.sh](runBackendServicesOnly.sh) script.
+To do that, you can use the [runBackendServicesOnly.sh](runBackendServicesAndRedis.sh) script.

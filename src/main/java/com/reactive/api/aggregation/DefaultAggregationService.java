@@ -6,13 +6,13 @@ import com.reactive.api.shipment.ShipmentService;
 import com.reactive.api.track.Status;
 import com.reactive.api.track.TrackService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +35,7 @@ public class DefaultAggregationService implements AggregationService {
             .map(trackService::getTrack)
             .orElse(Mono.just(Map.of()));
 
-        Mono<Map<String, Optional<Double>>> pricing = pricingCountryCodes
+        Mono<Map<String, OptionalDouble>> pricing = pricingCountryCodes
             .map(pricingService::getPricing)
             .orElse(Mono.just(Map.of()));
 
@@ -45,7 +45,7 @@ public class DefaultAggregationService implements AggregationService {
 
     private Aggregation aggregate(Map<String, Optional<List<Product>>> shipments,
                                   Map<String, Optional<Status>> track,
-                                  Map<String, Optional<Double>> pricing) {
+                                  Map<String, OptionalDouble> pricing) {
 
         return Aggregation.builder()
             .shipments(shipments)

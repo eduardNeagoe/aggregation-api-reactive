@@ -12,12 +12,25 @@ services:
       - aggregation-network
     environment:
       aggregation.apis-base-url: http://backend-services:4000
+      aggregation.cache.enabled: true
+      aggregation.cache.port: 6379
+      aggregation.cache.host: cache_db
+      aggregation.cache.expiration: 30m
     depends_on:
       - backend-services
+      - cache_db
+
 
   backend-services:
     image: qwkz/backend-services
     ports:
       - "4000:4000"
+    networks:
+      - aggregation-network
+
+  cache_db:
+    image: redis:latest
+    ports:
+      - "3000:6379"
     networks:
       - aggregation-network

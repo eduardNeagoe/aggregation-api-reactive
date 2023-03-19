@@ -1,4 +1,4 @@
-package com.reactive.api;
+package com.reactive.api.util;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
