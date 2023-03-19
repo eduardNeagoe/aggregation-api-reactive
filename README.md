@@ -344,6 +344,8 @@ Please consider this test a bonus, but not the final indicator of the SLA.
 
 ### Other tests
 
+DISCLAIMER: There are nowhere enough tests for this app. Because my main concern was load testing, I only provided a few integration tests and 0 unit tests.
+
 All the tests I provided in this app are integration tests - they require you to start the Backend Service API and Redis before
 running them.
 
