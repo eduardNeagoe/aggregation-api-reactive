@@ -106,7 +106,6 @@ maintainability, performance, and scalability.
 
 ## API orchestration decisions
 
-
 ### Orchestrating the calls to each API - Shipments, Track, Pricing
 
 #### Problem
@@ -148,9 +147,10 @@ Project Reactor helps us do that with its concise, functional-programming style 
 
 This pattern minimizes the latency when building the list of outputs (prices) for each Pricing API call.
 
-We follow the same pattern for the Shipments and Track APIs. 
+We follow the same pattern for the Shipments and Track APIs.
 
-That settles the calls to the individual backend APIs. But how do we aggregate the results of all these calls? Let's talk about that in the next section.
+That settles the calls to the individual backend APIs. But how do we aggregate the results of all these calls? Let's
+talk about that in the next section.
 
 ### Orchestrating the Aggregation services calls
 
@@ -160,7 +160,8 @@ Calling multiple APIs sequentially to then aggregate the responses can introduce
 
 #### Solution
 
-Because there are no dependencies between the Shipments, Track, and Pricing APIs we can call them at the same. When all the 3 responses are available, we can build the aggregation result.
+Because there are no dependencies between the Shipments, Track, and Pricing APIs we can call them at the same. When all
+the 3 responses are available, we can build the aggregation result.
 
 Project Reactor helps us do that in an elegant way. The `Mono.zip` operator subscribes eagerly to all the
 publishers. When all the 3 responses are available we create the Aggregation response:
@@ -198,7 +199,8 @@ publishers. When all the 3 responses are available we create the Aggregation res
     }
 ```
 
-This pattern minimizes§ the latency when aggregating the maps that result from the implementation we discussed in the previous section.
+This pattern minimizes§ the latency when aggregating the maps that result from the implementation we discussed in the
+previous section.
 
 ## Starting the application
 
@@ -283,4 +285,11 @@ Please consider this test a bonus, but not the final indicator of the SLA.
 
 ## Future considerations
 
-### Changes in tech stack - Caching?
+### Tech stack
+
+This app could benefit from caching to reduce the number of calls it makes to the Backend Services API.
+
+Redis could be a valid choice because it is an in-memory data store that can be used to store and retrieve frequently
+accessed data quickly. These are libraries for Redis that provide support for reactive programming and non-blocking interactions with Redis.
+
+A drawback of introducing this mechanism is that the cached data may become stale.
