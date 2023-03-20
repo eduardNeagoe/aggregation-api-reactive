@@ -344,8 +344,8 @@ Please consider this test a bonus, but not the final indicator of the SLA.
 
 DISCLAIMER: There are nowhere enough tests for this app. Because my main concern was load testing, I only provided a few integration tests and 0 unit tests.
 
-All the tests I provided in this app are integration tests - they require you to start the Backend Service API and Redis before running them.
+All the tests I provided in this app are integration tests - they require you to start the Backend Service API and Redis before running them. 
+
+To do that, you can use the [runBackendServicesAndRedis.sh](runBackendServicesAndRedis.sh) script.
 
 NOTE: A good addition would be to use test containers for the integration tests to remove the need of starting other services manually.
-
-To do that, you can use the [runBackendServicesOnly.sh](runBackendServicesAndRedis.sh) script.
