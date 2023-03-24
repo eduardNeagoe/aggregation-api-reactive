@@ -139,9 +139,10 @@ This app could benefit from caching to reduce the number of calls it makes to th
 
 Redis is a valid choice because it is an in-memory data store that can be used to store and retrieve frequently
 accessed data quickly. These are libraries like Lettuce that provide support for reactive programming and non-blocking
-interactions with Redis. 
+interactions with Redis.
 
-A drawback of introducing this mechanism is that the cached data may become stale. To mitigate this risk, I introduced a data expiration time of 30 minutes.
+A drawback of introducing this mechanism is that the cached data may become stale. To mitigate this risk, I introduced a
+data expiration time of 30 minutes.
 
 ⚠️ The caching is enabled by default. You can control the caching feature through the following properties:
 
@@ -308,10 +309,15 @@ The results are incredible. The value went from ~4000 ms to 1000 ms.
 
 #### Optimizations
 
-I optimized for this result empirically by changing the timeout value for the requests to the Backend Services API. This
-timeout value indirectly affects the SLA by giving up on the requests that don't respond in time. The value I settled
-for is 2500 ms. The tradeoff here is that we may miss data that was on the way but couldn't reach our system before the
-timeout threshold.
+Timeouts enable a system to work within an SLA. 
+
+I optimized for this result (the one without the caching) empirically by changing the timeout value for the requests to
+the Backend Services API. This timeout value indirectly affects the SLA by abandoning the requests that don't respond in time and returning a fallback value.
+
+The timeout value I settled for is 2500 ms.
+
+The tradeoff we're making with this timeout is that we may miss data that was on the way but couldn't reach our system
+before the timeout.
 
 #### Limitations
 
@@ -344,10 +350,13 @@ Please consider this test a bonus, but not the final indicator of the SLA.
 
 ### Other tests
 
-DISCLAIMER: There are nowhere enough tests for this app. Because my main concern was load testing, I only provided a few integration tests and 0 unit tests.
+DISCLAIMER: There are nowhere enough tests for this app. Because my main concern was load testing, I only provided a few
+integration tests and 0 unit tests.
 
-All the tests I provided in this app are integration tests - they require you to start the Backend Service API and Redis before running them.
+All the tests I provided in this app are integration tests - they require you to start the Backend Service API and Redis
+before running them.
 
 To do that, you can use the [runBackendServicesAndRedis.sh](runBackendServicesAndRedis.sh) script.
 
-NOTE: A good addition would be to use test containers for the integration tests to remove the need of starting other services manually.
+NOTE: A good addition would be to use test containers for the integration tests to remove the need of starting other
+services manually.
