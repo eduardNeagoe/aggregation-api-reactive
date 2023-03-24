@@ -9,7 +9,9 @@ import reactor.core.publisher.Mono;
 
 @Component
 @ConditionalOnProperty(name = "aggregation.cache.enabled", havingValue = "true")
-public class CachingShipmentClient extends DefaultShipmentClient {
+public class CachingShipmentClient implements ShipmentClient {
+
+    private final ShipmentClient shipmentClient;
 
     private final ReactiveRedisOperations<String, Shipment> operations;
 
@@ -22,7 +24,7 @@ public class CachingShipmentClient extends DefaultShipmentClient {
                                  ReactiveRedisOperations<String, Shipment> operations,
                                  ConfigProperties properties) {
 
-        super(configProperties);
+        this.shipmentClient = new DefaultShipmentClient(configProperties);
         this.operations = operations;
         this.properties = properties;
     }
@@ -36,7 +38,7 @@ public class CachingShipmentClient extends DefaultShipmentClient {
     }
 
     private Mono<Shipment> getAndCacheShipment(String shipmentsOrderNumbers, String key) {
-        return super.getShipment(shipmentsOrderNumbers)
+        return shipmentClient.getShipment(shipmentsOrderNumbers)
             .flatMap(shipment -> shipment.getProducts().isEmpty() ? Mono.just(shipment) : cacheThenReturn(key, shipment));
 
     }

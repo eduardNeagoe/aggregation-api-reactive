@@ -9,7 +9,9 @@ import reactor.core.publisher.Mono;
 
 @Component
 @ConditionalOnProperty(name = "aggregation.cache.enabled", havingValue = "true")
-public class CachingTrackClient extends DefaultTrackClient {
+public class CachingTrackClient implements TrackClient {
+
+    private final TrackClient trackClient;
 
     private final ReactiveRedisOperations<String, Track> operations;
 
@@ -22,7 +24,7 @@ public class CachingTrackClient extends DefaultTrackClient {
                               ReactiveRedisOperations<String, Track> operations,
                               ConfigProperties properties) {
 
-        super(configProperties);
+        this.trackClient = new DefaultTrackClient(configProperties);
         this.operations = operations;
         this.properties = properties;
     }
@@ -36,7 +38,7 @@ public class CachingTrackClient extends DefaultTrackClient {
     }
 
     private Mono<Track> getAndCacheTrack(String trackOrderNumber, String key) {
-        return super.getTrack(trackOrderNumber)
+        return trackClient.getTrack(trackOrderNumber)
             .flatMap(track -> track.getStatus().isEmpty() ? Mono.just(track) : cacheThenReturn(key, track));
     }
 

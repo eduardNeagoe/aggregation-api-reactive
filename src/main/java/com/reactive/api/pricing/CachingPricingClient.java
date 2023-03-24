@@ -9,7 +9,9 @@ import reactor.core.publisher.Mono;
 
 @Component
 @ConditionalOnProperty(name = "aggregation.cache.enabled", havingValue = "true")
-public class CachingPricingClient extends DefaultPricingClient {
+public class CachingPricingClient implements PricingClient {
+
+    private final DefaultPricingClient pricingClient;
 
     private final ReactiveRedisOperations<String, Pricing> operations;
 
@@ -22,7 +24,7 @@ public class CachingPricingClient extends DefaultPricingClient {
                                 ReactiveRedisOperations<String, Pricing> operations,
                                 ConfigProperties properties) {
 
-        super(configProperties);
+        this.pricingClient = new DefaultPricingClient(configProperties);
         this.operations = operations;
         this.properties = properties;
     }
@@ -36,7 +38,7 @@ public class CachingPricingClient extends DefaultPricingClient {
     }
 
     private Mono<Pricing> getAndCachePricing(String pricingCountryCode, String key) {
-        return super.getPricing(pricingCountryCode)
+        return pricingClient.getPricing(pricingCountryCode)
             .flatMap(pricing -> pricing.getPrice().isEmpty() ? Mono.just(pricing) : cacheThenReturn(key, pricing));
     }
 
