@@ -4,13 +4,13 @@
     * [APIs Contracts](#apis-contracts)
 - [Design decisions](#design-decisions)
     * [Technology choices](#technology-choices)
-        + [Why reactive?](#why-reactive)
-        + [Why caching?](#why-caching)
-    * [API orchestration decisions](#api-orchestration-decisions)
-        + [Orchestrating the calls to each API - Shipments, Track, Pricing](#orchestrating-the-calls-to-each-api---shipments--track--pricing)
+        + [Why reactive?](#why-reactive-)
+        + [Why caching?](#why-caching-)
+    * [API composition decisions](#api-composition-decisions)
+        + [Composing the individual calls to the Backed Services API](#composing-the-individual-calls-to-the-backed-services-api)
             - [Problem](#problem)
             - [Solution](#solution)
-        + [Orchestrating the Aggregation services calls](#orchestrating-the-aggregation-services-calls)
+        + [Composing the Aggregation services calls](#composing-the-aggregation-services-calls)
             - [Problem](#problem-1)
             - [Solution](#solution-1)
 - [Starting the application](#starting-the-application)
@@ -150,9 +150,9 @@ aggregation.cache.host: localhost
 aggregation.cache.expiration: 30m
 ```
 
-## API orchestration decisions
+## API composition decisions
 
-### Orchestrating the calls to each API - Shipments, Track, Pricing
+### Composing the individual calls to the Backed Services API
 
 #### Problem
 
@@ -198,7 +198,7 @@ We follow the same pattern for the Shipments and Track APIs.
 That settles the calls to the individual backend APIs. But how do we aggregate the results of all these calls? Let's
 talk about that in the next section.
 
-### Orchestrating the Aggregation services calls
+### Composing the Aggregation services calls
 
 #### Problem
 
