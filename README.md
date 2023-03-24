@@ -139,9 +139,11 @@ This app could benefit from caching to reduce the number of calls it makes to th
 
 Redis is a valid choice because it is an in-memory data store that can be used to store and retrieve frequently
 accessed data quickly. These are libraries like Lettuce that provide support for reactive programming and non-blocking
-interactions with Redis. A drawback of introducing this mechanism is that the cached data may become stale.
+interactions with Redis. 
 
-⚠️ By default, the caching is enabled. You can control the caching feature through the following properties:
+A drawback of introducing this mechanism is that the cached data may become stale. To mitigate this risk, I introduced a data expiration time of 30 minutes.
+
+⚠️ The caching is enabled by default. You can control the caching feature through the following properties:
 
 ```
 aggregation.cache.enabled: true
@@ -346,6 +348,6 @@ DISCLAIMER: There are nowhere enough tests for this app. Because my main concern
 
 All the tests I provided in this app are integration tests - they require you to start the Backend Service API and Redis before running them.
 
-NOTE: A good addition would be to use test containers for the integration tests to remove the need of starting other services manually.
+To do that, you can use the [runBackendServicesAndRedis.sh](runBackendServicesAndRedis.sh) script.
 
-To do that, you can use the [runBackendServicesOnly.sh](runBackendServicesAndRedis.sh) script.
+NOTE: A good addition would be to use test containers for the integration tests to remove the need of starting other services manually.
