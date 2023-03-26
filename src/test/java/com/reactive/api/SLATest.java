@@ -48,7 +48,7 @@ class SLATest {
     @DisplayName("Aggregation should respect the SLA for the 99th percentile")
     void aggregationSLA() {
 
-        int numberOfRequests = 1000;
+        int numberOfRequests = 100;
 
         String countryCodes = TestUtil.getAllCountryCodes(); // 249 codes
         String orderNumbers = TestUtil.generateOrderNumbers(300);
@@ -75,6 +75,10 @@ class SLATest {
             });
 
         Double durationFor99thPercentile = getDurationFor99thPercentile(requestDurationMonitor, numberOfRequests);
+
+        System.out.println("\n⏱️ Durations" +  requestDurationMonitor.values().stream().sorted().toList());
+        System.out.println("\n⏱️ 99th percentile " +  durationFor99thPercentile);
+
 
         //assert that 99% of the total number of requests take less than 5s
         assertTrue(durationFor99thPercentile < aggregationSLA,

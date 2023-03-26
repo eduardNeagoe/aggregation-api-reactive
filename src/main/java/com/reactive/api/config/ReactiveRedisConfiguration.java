@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.reactive.api.pricing.Pricing;
 import com.reactive.api.shipment.Shipment;
 import com.reactive.api.track.Track;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -72,6 +74,22 @@ public class ReactiveRedisConfiguration {
                 .build();
 
         return new ReactiveRedisTemplate<>(factory, context);
+    }
+
+    @Bean
+    public CircuitBreaker myCircuitBreakerconfig(){
+        return io.github.resilience4j.circuitbreaker.CircuitBreaker.of("aggregation",
+            CircuitBreakerConfig.custom()
+                .failureRateThreshold(50)
+                .recordExceptions(
+                    Throwable.class
+                )
+                .slidingWindowSize(2)
+
+//                .waitDurationInOpenState(Duration.ofMillis(1000))
+//                .permittedNumberOfCallsInHalfOpenState(2)
+                .build()
+        );
     }
 }
 

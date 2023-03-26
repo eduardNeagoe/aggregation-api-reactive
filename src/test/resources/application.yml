@@ -6,7 +6,7 @@ aggregation:
   url: aggregation?shipmentsOrderNumbers={shipmentsOrderNumbers}&trackOrderNumbers={trackOrderNumbers}&pricingCountryCodes={pricingCountryCodes}
   sla: 5000ms
   cache:
-    enabled: true
+    enabled: false
     port: 3000
     host: localhost
     expiration: 30m
@@ -27,3 +27,45 @@ aggregation:
   apis-base-url: http://localhost:${aggregation.apis-port}
   apis-port: 4000
   apis-timeout: 2500ms
+
+
+#resilience4j.circuitbreaker:
+#  instances:
+#    aggregation:
+##      registerHealthIndicator: true
+#      slidingWindowSize: 2
+#      failureRateThreshold: 50
+##      permittedNumberOfCallsInHalfOpenState: 2
+#      minimumNumberOfCalls: 2
+#      recordExceptions:
+#        - java.lang.RuntimeException
+
+
+#      slidingWindowSize: 5
+#      failureRateThreshold: 20
+#      recordExceptions:
+#        - java.lang.Exception
+#        - java.util.concurrent.TimeoutException
+
+
+#      permittedNumberOfCallsInHalfOpenState: 1
+#      slowCallDurationThreshold: 2500
+#      minimumNumberOfCalls: 20
+#      waitDurationInOpenState: 50s
+#      recordExceptions: java.lang.Exception.class
+
+
+
+
+#      CircuitBreakerConfig.custom()
+#      .failureRateThreshold(50)
+#      .recordExceptions(
+#      WebClientResponseException.class,
+#      WebClientResponseException.InternalServerError.class
+#      )
+#      .slidingWindowSize(5)
+#      .waitDurationInOpenState(Duration.ofMillis(1000))
+#      .permittedNumberOfCallsInHalfOpenState(2)
+#      .transitionOnResult()
+#      .build()
+
