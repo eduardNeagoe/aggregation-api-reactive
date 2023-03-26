@@ -1,6 +1,7 @@
 package com.reactive.api.shipment;
 
 import com.reactive.api.config.ConfigProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.ParameterizedTypeReference;
@@ -12,6 +13,7 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Component
 @ConditionalOnProperty(name = "aggregation.cache.enabled", havingValue = "false")
 public class DefaultShipmentClient implements ShipmentClient {
@@ -31,10 +33,11 @@ public class DefaultShipmentClient implements ShipmentClient {
 
         return getShipmentProducts(orderNumber)
             .map(products -> new Shipment(orderNumber, Optional.of(products)))
-            .timeout(configProperties.getShipmentProductsTimeout(), Mono.just(getFallbackShipment(orderNumber)))
+            .timeout(configProperties.getShipmentProductsTimeout(), getFallbackShipmentMono(orderNumber))
 
             // handles service unavailable error and other errors
-            .onErrorReturn(e -> e instanceof WebClientException, getFallbackShipment(orderNumber));
+            .onErrorResume(e -> e instanceof WebClientException, e -> getFallbackShipmentMono(orderNumber))
+            .doOnNext(shipment -> log.debug("Shipment result: " + shipment));
     }
 
     private Mono<List<Product>> getShipmentProducts(String orderNumber) {
@@ -43,6 +46,11 @@ public class DefaultShipmentClient implements ShipmentClient {
             .retrieve()
             .bodyToMono(new ParameterizedTypeReference<>() {
             });
+    }
+
+    private Mono<Shipment> getFallbackShipmentMono(String orderNumber) {
+        return Mono.just(getFallbackShipment(orderNumber))
+            .doOnNext(track -> log.debug("Falling back on empty shipment"));
     }
 
     private Shipment getFallbackShipment(String orderNumber) {

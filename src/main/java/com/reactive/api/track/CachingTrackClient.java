@@ -1,12 +1,14 @@
 package com.reactive.api.track;
 
 import com.reactive.api.config.ConfigProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.core.ReactiveRedisOperations;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Component
 @ConditionalOnProperty(name = "aggregation.cache.enabled", havingValue = "true")
 public class CachingTrackClient implements TrackClient {
@@ -33,6 +35,7 @@ public class CachingTrackClient implements TrackClient {
     public Mono<Track> getTrack(String trackOrderNumber) {
         String key = KEY_PREFIX + trackOrderNumber;
         return operations.opsForValue().get(key)
+            .doOnNext(track -> log.debug("Returning cached track: " + track))
             .onErrorResume(throwable -> Mono.empty())
             .switchIfEmpty(getAndCacheTrack(trackOrderNumber, key));
     }
@@ -45,7 +48,8 @@ public class CachingTrackClient implements TrackClient {
     private Mono<Track> cacheThenReturn(String key, Track track) {
         return operations.opsForValue()
             .set(key, track, properties.getExpiration())
-            .thenReturn(track);
+            .thenReturn(track)
+            .doOnNext(t -> log.debug("Added to cache - track: " + t));
     }
 
 }

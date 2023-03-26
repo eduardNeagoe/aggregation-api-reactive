@@ -29,7 +29,7 @@ public class DefaultAggregationService implements AggregationService {
                                        Optional<List<String>> trackOrderNumbers,
                                        Optional<List<String>> pricingCountryCodes) {
 
-        log.info("Processing Aggregation request...");
+        log.debug("Processing Aggregation request...");
 
         Mono<Map<String, Optional<List<Product>>>> shipments = shipmentsOrderNumbers
             .map(shipmentService::getShipment)
@@ -45,7 +45,7 @@ public class DefaultAggregationService implements AggregationService {
 
         return Mono.zip(shipments, track, pricing)
             .map(tuple -> aggregate(tuple.getT1(), tuple.getT2(), tuple.getT3()))
-            .doOnNext(aggregation -> log.info("Aggregation finished"));
+            .doOnNext(aggregation -> log.debug("Aggregation finished"));
     }
 
     private Aggregation aggregate(Map<String, Optional<List<Product>>> shipments,

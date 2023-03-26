@@ -1,12 +1,14 @@
 package com.reactive.api.pricing;
 
 import com.reactive.api.config.ConfigProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.core.ReactiveRedisOperations;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Component
 @ConditionalOnProperty(name = "aggregation.cache.enabled", havingValue = "true")
 public class CachingPricingClient implements PricingClient {
@@ -33,6 +35,7 @@ public class CachingPricingClient implements PricingClient {
     public Mono<Pricing> getPricing(String pricingCountryCode) {
         String key = KEY_PREFIX + pricingCountryCode;
         return operations.opsForValue().get(key)
+            .doOnNext(pricing-> log.debug("Returning cached pricing: " + pricing))
             .onErrorResume(throwable -> Mono.empty())
             .switchIfEmpty(getAndCachePricing(pricingCountryCode, key));
     }
@@ -45,6 +48,7 @@ public class CachingPricingClient implements PricingClient {
     private Mono<Pricing> cacheThenReturn(String key, Pricing pricing) {
         return operations.opsForValue()
             .set(key, pricing, properties.getExpiration())
-            .thenReturn(pricing);
+            .thenReturn(pricing)
+            .doOnNext(p -> log.debug("Added to cache - pricing: " + p));
     }
 }

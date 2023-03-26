@@ -27,3 +27,7 @@ aggregation:
   apis-base-url: http://localhost:${aggregation.apis-port}
   apis-port: 4000
   apis-timeout: 2500ms
+
+logging:
+  level:
+    com.reactive.api: INFO
