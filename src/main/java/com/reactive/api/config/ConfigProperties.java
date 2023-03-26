@@ -17,13 +17,13 @@ public class ConfigProperties {
     private Duration sla;
 
     private String shipmentBaseUrl;
-    private String shipmentUrl;
-    private Duration shipmentTimeout;
+    private String shipmentProductsUrl;
+    private Duration shipmentProductsTimeout;
 
 
     private String trackBaseUrl;
-    private String trackUrl;
-    private Duration trackTimeout;
+    private String trackStatusUrl;
+    private Duration trackStatusTimeout;
 
 
     private String pricingBaseUrl;
