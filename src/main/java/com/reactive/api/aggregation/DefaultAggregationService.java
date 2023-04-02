@@ -1,5 +1,6 @@
 package com.reactive.api.aggregation;
 
+import com.reactive.api.config.ConfigProperties;
 import com.reactive.api.pricing.PricingService;
 import com.reactive.api.shipment.Product;
 import com.reactive.api.shipment.ShipmentService;
@@ -10,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,9 +22,11 @@ import java.util.OptionalDouble;
 @Slf4j
 public class DefaultAggregationService implements AggregationService {
 
+    public static final Duration ERROR_MARGIN = Duration.ofMillis(200);
     private final ShipmentService shipmentService;
     private final TrackService trackService;
     private final PricingService pricingService;
+    private final ConfigProperties configProperties;
 
     @Override
     public Mono<Aggregation> aggregate(Optional<List<String>> shipmentsOrderNumbers,
@@ -45,6 +49,7 @@ public class DefaultAggregationService implements AggregationService {
 
         return Mono.zip(shipments, track, pricing)
             .map(tuple -> aggregate(tuple.getT1(), tuple.getT2(), tuple.getT3()))
+            .timeout(configProperties.getSla().minus(ERROR_MARGIN), Mono.just(new Aggregation()))
             .doOnNext(aggregation -> log.debug("Aggregation finished"));
     }
 
