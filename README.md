@@ -181,10 +181,7 @@ Project Reactor helps us do that with its concise, functional-programming style 
 ```
     public Mono<Map<String, Optional<Double>>> getPricing(List<String> pricingCountryCodes) {
         return Flux.fromIterable(pricingCountryCodes)
-            .parallel()
-            .runOn(Schedulers.parallel())
             .flatMap(pricingClient::getPricing)
-            .sequential()
             .collectMap(Pricing::getCountryCode, Pricing::getPrice)
             .doOnNext(this::removeEmptyValues);
     }
