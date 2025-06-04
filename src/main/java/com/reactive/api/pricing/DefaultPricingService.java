@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import java.util.List;
 import java.util.Map;
@@ -17,10 +16,7 @@ public class DefaultPricingService implements PricingService {
 
     public Mono<Map<String, OptionalDouble>> getPricing(List<String> pricingCountryCodes) {
         return Flux.fromIterable(pricingCountryCodes)
-            .parallel()
-            .runOn(Schedulers.parallel())
             .flatMap(pricingClient::getPricing)
-            .sequential()
             .collectMap(Pricing::getCountryCode, Pricing::getPrice)
             .doOnNext(this::removeEmptyValues);
     }
